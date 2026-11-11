@@ -28,6 +28,7 @@
 #include <glad/glad.h>  // glad library (OpenGL loader)
 
 #include "sates.h"
+#include "clkinfo.h"
 #include "vec23.h"
 #include "stb_image.h"
 #include "colormap_png.h"
@@ -1745,11 +1746,13 @@ static void CPU_FPS_End()
     frameCount++;
     timeAccumulator += deltaFps;
 
-    // Refresh every 10ms
-    if (timeAccumulator >= 0.01f) 
+    // Refresh periodically with smoothing so the readout is stable.
+    if (timeAccumulator >= 0.25f) 
     {
         float fps = static_cast<float>(frameCount) / timeAccumulator;
-        s_currentCpuFps.store(fps, std::memory_order_release);
+        float prev = s_currentCpuFps.load(std::memory_order_relaxed);
+        float smoothed = (prev <= 0.0f) ? fps : (prev * 0.8f + fps * 0.2f);
+        s_currentCpuFps.store(smoothed, std::memory_order_release);
         
         frameCount = 0;
         timeAccumulator = 0.0f;
@@ -2183,11 +2186,11 @@ void BHRTRender()
     u64 timeSinceUpdate = currentTime - s_fpsUpdateTime;
     float secondsSinceUpdate = (timeSinceUpdate * 625.0f / 12.0f) / 1000000000.0f;
     
-    if(secondsSinceUpdate >= 0.01f) {
-        s_fps = s_frameCount / secondsSinceUpdate;
+    if(secondsSinceUpdate >= 0.25f) {
+        float instantFps = s_frameCount / secondsSinceUpdate;
+        s_fps = (s_fps <= 0.0f) ? instantFps : (s_fps * 0.8f + instantFps * 0.2f);
         s_frameCount = 0;
         s_fpsUpdateTime = currentTime;
-
     }
 
     glBindVertexArray(s_vao);
@@ -2325,6 +2328,14 @@ void BHRTRender()
     char CPUFPS[64];
     snprintf(CPUFPS, sizeof(CPUFPS), "%.3f", s_currentCpuFps.load(std::memory_order_acquire));
     drawText(CPUFPS, 0.00f, 0.90f, 0.02f, 1.0f, 0.0f, 0.0f);
+
+    char clkText[32];
+    snprintf(clkText, sizeof(clkText), "%u", clkInfoGetMemHz() / 1000000);
+    drawText(clkText, -0.95f, -0.66f, 0.02f, 1.0f, 1.0f, 1.0f);
+    snprintf(clkText, sizeof(clkText), "%u", clkInfoGetGpuHz() / 1000000);
+    drawText(clkText, -0.95f, -0.82f, 0.02f, 1.0f, 1.0f, 1.0f);
+    snprintf(clkText, sizeof(clkText), "%u", clkInfoGetCpuHz() / 1000000);
+    drawText(clkText, 0.95f - (float)strlen(clkText) * 8.0f * 0.02f, -0.82f, 0.02f, 1.0f, 1.0f, 1.0f);
 
     // flip for next frame
     s_frameIndex ^= 1;

@@ -20,6 +20,7 @@
 #include "noise_png.h"
 #include "wall_png.h"
 #include "sates.h"
+#include "clkinfo.h"
 
 //-----------------------------------------------------------------------------
 // nxlink support
@@ -705,8 +706,9 @@ void frRender()
     u64 timeSinceUpdate = currentTime - s_fpsUpdateTime;
     float secondsSinceUpdate = (timeSinceUpdate * 625.0f / 12.0f) / 1000000000.0f;
     
-    if(secondsSinceUpdate >= 0.01f) {
-        s_fps = s_frameCount / secondsSinceUpdate;
+    if(secondsSinceUpdate >= 0.25f) {
+        float instantFps = s_frameCount / secondsSinceUpdate;
+        s_fps = (s_fps <= 0.0f) ? instantFps : (s_fps * 0.8f + instantFps * 0.2f);
         s_frameCount = 0;
         s_fpsUpdateTime = currentTime;
     }
@@ -729,6 +731,14 @@ void frRender()
     char fpsText[32];
     snprintf(fpsText, sizeof(fpsText), "%.3f", s_fps);
     drawText(fpsText, -0.95f, 0.90f, 0.02f, 1.0f, 0.0f, 0.0f);
+
+    char clkText[32];
+    snprintf(clkText, sizeof(clkText), "%u", clkInfoGetMemHz() / 1000000);
+    drawText(clkText, -0.95f, -0.66f, 0.02f, 1.0f, 1.0f, 1.0f);
+    snprintf(clkText, sizeof(clkText), "%u", clkInfoGetGpuHz() / 1000000);
+    drawText(clkText, -0.95f, -0.82f, 0.02f, 1.0f, 1.0f, 1.0f);
+    snprintf(clkText, sizeof(clkText), "%u", clkInfoGetCpuHz() / 1000000);
+    drawText(clkText, 0.95f - (float)strlen(clkText) * 8.0f * 0.02f, -0.82f, 0.02f, 1.0f, 1.0f, 1.0f);
 }
 
 void frExit()

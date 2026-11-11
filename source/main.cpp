@@ -24,6 +24,7 @@
 #include "CPURT.h"
 #include "CPURB.h"
 #include "BHRT.h"
+#include "clkinfo.h"
 
 
 // NX Link Support
@@ -163,8 +164,10 @@ int main(int argc,char* argv[]){
     // Configure our supported input.
     padConfigureInput(1, HidNpadStyleSet_NpadStandard);
     PadState pad;
+
     padInitializeDefault(&pad);
-    
+    clkInfoInit();
+
     consoleInit(NULL);
     
     // Set defaults
@@ -268,6 +271,12 @@ int main(int argc,char* argv[]){
                     drawMenu(selectedItem);
                     state = STATE_MENU;
                 } else {
+                    if(kDown & HidNpadButton_L) clkInfoGpuStep(-1);
+                    if(kDown & HidNpadButton_R) clkInfoGpuStep(1);
+                    if(kDown & HidNpadButton_ZL) clkInfoCpuStep(-1);
+                    if(kDown & HidNpadButton_ZR) clkInfoCpuStep(1);
+                    if(kDown & HidNpadButton_Down) clkInfoMemStep(-1);
+                    if(kDown & HidNpadButton_Up) clkInfoMemStep(1);
                     frRender();
                     eglSwapBuffers(s_display, s_surface);
                 }
@@ -282,6 +291,12 @@ int main(int argc,char* argv[]){
                     drawMenu(selectedItem);
                     state = STATE_MENU;
                 } else {
+                    if(kDown & HidNpadButton_L) clkInfoGpuStep(-1);
+                    if(kDown & HidNpadButton_R) clkInfoGpuStep(1);
+                    if(kDown & HidNpadButton_ZL) clkInfoCpuStep(-1);
+                    if(kDown & HidNpadButton_ZR) clkInfoCpuStep(1);
+                    if(kDown & HidNpadButton_Down) clkInfoMemStep(-1);
+                    if(kDown & HidNpadButton_Up) clkInfoMemStep(1);
                     frRamRender();
                     eglSwapBuffers(s_display, s_surface);
                 }
@@ -296,6 +311,12 @@ int main(int argc,char* argv[]){
                     drawMenu(selectedItem);
                     state = STATE_MENU;
                 } else {
+                    if(kDown & HidNpadButton_L) clkInfoGpuStep(-1);
+                    if(kDown & HidNpadButton_R) clkInfoGpuStep(1);
+                    if(kDown & HidNpadButton_ZL) clkInfoCpuStep(-1);
+                    if(kDown & HidNpadButton_ZR) clkInfoCpuStep(1);
+                    if(kDown & HidNpadButton_Down) clkInfoMemStep(-1);
+                    if(kDown & HidNpadButton_Up) clkInfoMemStep(1);
                     GPUPTRender();
                     eglSwapBuffers(s_display, s_surface);
 
@@ -311,6 +332,12 @@ int main(int argc,char* argv[]){
                     drawMenu(selectedItem);
                     state = STATE_MENU;
                 } else {
+                    if(kDown & HidNpadButton_L) clkInfoGpuStep(-1);
+                    if(kDown & HidNpadButton_R) clkInfoGpuStep(1);
+                    if(kDown & HidNpadButton_ZL) clkInfoCpuStep(-1);
+                    if(kDown & HidNpadButton_ZR) clkInfoCpuStep(1);
+                    if(kDown & HidNpadButton_Down) clkInfoMemStep(-1);
+                    if(kDown & HidNpadButton_Up) clkInfoMemStep(1);
                     CPURTRender();
                     eglSwapBuffers(s_display, s_surface);
                 }
@@ -325,6 +352,12 @@ int main(int argc,char* argv[]){
                     drawMenu(selectedItem);
                     state = STATE_MENU;
                 } else {
+                    if(kDown & HidNpadButton_L) clkInfoGpuStep(-1);
+                    if(kDown & HidNpadButton_R) clkInfoGpuStep(1);
+                    if(kDown & HidNpadButton_ZL) clkInfoCpuStep(-1);
+                    if(kDown & HidNpadButton_ZR) clkInfoCpuStep(1);
+                    if(kDown & HidNpadButton_Down) clkInfoMemStep(-1);
+                    if(kDown & HidNpadButton_Up) clkInfoMemStep(1);
                     CPURBRender();
                     eglSwapBuffers(s_display, s_surface);
                 }
@@ -339,6 +372,12 @@ int main(int argc,char* argv[]){
                     drawMenu(selectedItem);
                     state = STATE_MENU;
                 } else {
+                    if(kDown & HidNpadButton_L) clkInfoGpuStep(-1);
+                    if(kDown & HidNpadButton_R) clkInfoGpuStep(1);
+                    if(kDown & HidNpadButton_ZL) clkInfoCpuStep(-1);
+                    if(kDown & HidNpadButton_ZR) clkInfoCpuStep(1);
+                    if(kDown & HidNpadButton_Down) clkInfoMemStep(-1);
+                    if(kDown & HidNpadButton_Up) clkInfoMemStep(1);
                     BHRTRender();
                     eglSwapBuffers(s_display, s_surface);
                 }
@@ -355,8 +394,21 @@ int main(int argc,char* argv[]){
     } else if(state == STATE_FURMARK_RB) {
         frRamExit();
         deinitEgl();
+    } else if(state == STATE_GPU_PT) {
+        GPUPTExit();
+        deinitEgl();
+    } else if(state == STATE_CPU_RT) {
+        CPURTExit();
+        deinitEgl();
+    } else if(state == STATE_CPU_RB) {
+        CPURBExit();
+        deinitEgl();
+    } else if(state == STATE_BH_RT) {
+        BHRTExit();
+        deinitEgl();
     }
 
+    clkInfoExit();
     consoleExit(NULL);
     return EXIT_SUCCESS;
 }

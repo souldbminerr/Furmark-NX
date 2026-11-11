@@ -1,2 +1,4 @@
 build/
 Furmark-NX*
+/.vscode
+*.nro
