@@ -1258,12 +1258,16 @@ void CPURBRender()
     drawText(sampleText, -0.95f, 0.85f, 0.02f, 1.0f, 0.0f, 0.0f);
 
     char clkText[32];
+    snprintf(clkText, sizeof(clkText), "%u", getGpuVoltMili() / 1000);
+    drawText(clkText, -0.95f, -0.5f, 0.02f, 1.0f, 1.0f, 1.0f);
     snprintf(clkText, sizeof(clkText), "%u", clkInfoGetMemHz() / 1000000);
     drawText(clkText, -0.95f, -0.66f, 0.02f, 1.0f, 1.0f, 1.0f);
     snprintf(clkText, sizeof(clkText), "%u", clkInfoGetGpuHz() / 1000000);
     drawText(clkText, -0.95f, -0.82f, 0.02f, 1.0f, 1.0f, 1.0f);
     snprintf(clkText, sizeof(clkText), "%u", clkInfoGetCpuHz() / 1000000);
     drawText(clkText, 0.95f - (float)strlen(clkText) * 8.0f * 0.02f, -0.82f, 0.02f, 1.0f, 1.0f, 1.0f);
+    snprintf(clkText, sizeof(clkText), "%u", getCpuVoltMili() / 1000);
+    drawText(clkText, 0.95f - (float)strlen(clkText) * 8.0f * 0.02f, -0.66f, 0.02f, 1.0f, 1.0f, 1.0f);
 
     eglSwapBuffers(s_display, s_surface);
     frame++;

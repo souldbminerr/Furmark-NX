@@ -1,4 +1,5 @@
 #include "clkinfo.h"
+#include "rgltr.h"
 
 #define CLK_MAX_RATES 128
 
@@ -103,12 +104,19 @@ static u32 getHz(PcvModule module) {
     return hz;
 }
 
+RgltrSession regSesGpu = {};
+RgltrSession regSesCpu = {};
+
 void clkInfoInit(void) {
     if (g_initialized) return;
 
     Result rc = clkrstInitialize();
     if (R_FAILED(rc)) return;
     g_initialized = true;
+
+    rgltrInitialize();
+    rgltrOpenSession(&regSesCpu, PcvPowerDomainId_Max77812_Cpu);
+    rgltrOpenSession(&regSesGpu, PcvPowerDomainId_Max77812_Gpu);
 
     loadTable(&g_gpu, PcvModule_GPU);
     loadTable(&g_cpu, PcvModule_CpuBus);
@@ -146,6 +154,9 @@ void clkInfoInit(void) {
 void clkInfoExit(void) {
     if (g_initialized) {
         clkrstExit();
+        rgltrCloseSession(&regSesCpu);
+        rgltrCloseSession(&regSesGpu);
+        rgltrExit();
         g_initialized = false;
     }
     g_gpu.count = g_cpu.count = g_mem.count = 0;
@@ -175,3 +186,15 @@ static void stepTable(ClkTable* t, PcvModule module, int delta) {
 void clkInfoGpuStep(int delta) { stepTable(&g_gpu, PcvModule_GPU, delta); }
 void clkInfoCpuStep(int delta) { stepTable(&g_cpu, PcvModule_CpuBus, delta); }
 void clkInfoMemStep(int delta) { stepTable(&g_mem, PcvModule_EMC, delta); }
+
+u32 getGpuVoltMili() {
+    u32 out = 0;
+    rgltrGetVoltage(&regSesGpu, &out);
+    return out;
+}
+
+u32 getCpuVoltMili() {
+    u32 out = 0;
+    rgltrGetVoltage(&regSesCpu, &out);
+    return out;
+}

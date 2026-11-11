@@ -15,6 +15,8 @@ u32 clkInfoGetMemHz(void);
 void clkInfoGpuStep(int delta);
 void clkInfoCpuStep(int delta);
 void clkInfoMemStep(int delta);
+u32 getGpuVoltMili();
+u32 getCpuVoltMili();
 
 #ifdef __cplusplus
 }
